@@ -3,305 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OMAR FAROOQ | #عمر_يجرب - التجربة السينمائية</title>
-    
-    <!-- خطوط جوجل -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@300;500;800;900&family=Syne:wght@800&display=swap" rel="stylesheet">
-    <!-- مكتبة الأيقونات -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة Three.js للخلفية الـ 3D -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+    <title>تحدي الفيديو التفاعلي</title>
     <style>
-        :root {
-            --primary: #ff5e00;
-            --primary-glow: #ff7b2b;
-            --accent: #00f2fe;
-            --bg: #030305;
-            --card-bg: rgba(15, 15, 20, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #ffffff;
-            --muted: #a0a0b8;
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            /* حل مشكلة خروج النص عن مساره */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', 'Cairo', sans-serif; scroll-behavior: smooth; }
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; cursor: none; }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden; /* يمنع أي عنصر من الخروج عن الحواف */
+        }
 
-        /* الخلفية الـ 3D */
-        #webgl-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
 
-        /* الماوس التفاعلي النيون */
-        .cursor-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); box-shadow: 0 0 10px var(--accent); }
-        .cursor-outline { width: 45px; height: 45px; border: 1.5px solid var(--primary); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: all 0.1s ease-out; box-shadow: 0 0 20px rgba(255, 94, 0, 0.4); }
-        body:hover .cursor-outline { opacity: 1; }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* نسبة 16:9 */
+            height: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #000;
+        }
 
-        /* النافبار */
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 8%; position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(3, 3, 5, 0.7); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border); }
-        .logo { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 900; color: #fff; text-decoration: none; letter-spacing: 2px; text-transform: uppercase; }
-        .logo span { color: var(--primary); text-shadow: 0 0 25px var(--primary-glow); }
-        .nav-links { display: flex; gap: 35px; list-style: none; }
-        .nav-links a { color: var(--muted); text-decoration: none; font-weight: 800; font-size: 1.1rem; transition: all 0.3s; position: relative; }
-        .nav-links a:hover { color: #fff; }
-        .nav-links a::after { content: ''; position: absolute; bottom: -8px; right: 0; width: 0%; height: 2px; background: var(--accent); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
-        .nav-links a:hover::after { width: 100%; }
+        .video-container iframe, .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-        /* الهيرو */
-        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 140px 8% 60px 8%; position: relative; }
-        .hero-tag { background: linear-gradient(90deg, rgba(255,94,0,0.15), rgba(0,242,254,0.15)); border: 1px solid var(--primary); padding: 12px 28px; border-radius: 50px; color: #fff; font-weight: 900; letter-spacing: 1px; margin-bottom: 30px; box-shadow: 0 0 30px rgba(255, 94, 0, 0.2); animation: float 3s ease-in-out infinite; }
-        .hero-tag i { color: var(--accent); margin-left: 8px; }
-        .hero h1 { font-size: 5.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 25px; text-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .hero h1 span { background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; display: inline-block; }
-        .hero p { max-width: 800px; font-size: 1.4rem; color: var(--muted); line-height: 1.8; margin-bottom: 50px; }
+        .content {
+            background: #fdfbf7;
+            padding: 15px;
+            border-right: 4px solid #f1c40f;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        /* تنسيقات اللعبة / التحدي */
+        .quiz-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #eef2f5;
+            border-radius: 12px;
+            border: 2px solid #bdc3c7;
+        }
+
+        .quiz-title {
+            color: #2980b9;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            padding: 12px 20px;
+            background: #fff;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: right;
+            font-size: 16px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .option-btn:hover {
+            background: #3498db;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        #reward-section {
+            display: none;
+            margin-top: 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .important-reward {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
         
-        .btn-epic { padding: 18px 45px; background: linear-gradient(45deg, var(--primary), #ff8c00); color: white; border: none; border-radius: 50px; font-weight: 900; font-size: 1.2rem; text-decoration: none; display: inline-flex; align-items: center; gap: 15px; box-shadow: 0 0 40px rgba(255, 94, 0, 0.6); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: none; }
-        .btn-epic:hover { transform: translateY(-8px) scale(1.05); box-shadow: 0 0 60px rgba(255, 94, 0, 0.9); }
-
-        /* الأقسام العامة */
-        .section-header { text-align: center; margin-bottom: 60px; }
-        .section-header h2 { font-size: 3.2rem; font-weight: 900; margin-bottom: 15px; }
-        .section-header p { color: var(--muted); font-size: 1.2rem; }
-
-        /* سينما الفيديو */
-        .cinema-section { margin: 0 8% 120px 8%; }
-        .cinema-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; overflow: hidden; display: grid; grid-template-columns: 1.5fr 1fr; box-shadow: 0 40px 100px rgba(0,0,0,0.9); backdrop-filter: blur(25px); position: relative; }
-        .video-container { position: relative; padding-bottom: 56.25%; height: 0; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .cinema-info { padding: 50px; display: flex; flex-direction: column; justify-content: center; }
-        .cinema-info h3 { font-size: 2.2rem; font-weight: 900; line-height: 1.4; margin: 15px 0; color: #fff; }
-        .highlights { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 25px; border: 1px solid rgba(255,255,255,0.08); margin-top: 20px; }
-        .highlights li { font-size: 1rem; color: #ddd; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
-        .highlights li span { background: var(--accent); color: #000; font-weight: 900; padding: 4px 10px; border-radius: 8px; font-size: 0.9rem; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); }
-
-        /* شبكة التواصل */
-        .social-universe { margin: 0 8% 120px 8%; }
-        .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-        .social-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 25px; padding: 40px 20px; text-align: center; text-decoration: none; color: white; backdrop-filter: blur(20px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: none; }
-        .social-item i { font-size: 3.5rem; margin-bottom: 20px; transition: transform 0.4s ease, filter 0.4s ease; }
-        .social-item.yt i { color: #ff0000; filter: drop-shadow(0 0 15px rgba(255,0,0,0.5)); }
-        .social-item.fb i { color: #1877f2; filter: drop-shadow(0 0 15px rgba(24,119,242,0.5)); }
-        .social-item.snap i { color: #fffc00; filter: drop-shadow(0 0 15px rgba(255,252,0,0.5)); }
-        .social-item.insta i { color: #e1306c; filter: drop-shadow(0 0 15px rgba(225,48,108,0.5)); }
-        .social-item.tiktok i { color: #00f2fe; filter: drop-shadow(0 0 15px rgba(0,242,254,0.5)); }
-        .social-item.twitter i { color: #fff; filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); }
-        .social-item h4 { font-size: 1.5rem; font-weight: 900; margin-bottom: 10px; }
-        .social-item:hover { transform: translateY(-15px); border-color: var(--primary); box-shadow: 0 25px 50px rgba(255,94,0,0.2); }
-        .social-item:hover i { transform: scale(1.3) rotate(10deg); }
-
-        /* فورم الاقتراحات (تعمل بشكل حقيقي) */
-        .portal-section { margin: 0 8% 80px 8%; background: linear-gradient(135deg, rgba(255,94,0,0.1), rgba(0,242,254,0.1)); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; padding: 80px 8%; text-align: center; backdrop-filter: blur(25px); box-shadow: 0 30px 80px rgba(0,0,0,0.6); transition: border-color 0.4s; }
-        .portal-section:hover { border-color: var(--accent); }
-        .portal-form { display: flex; max-width: 700px; margin: 40px auto 0 auto; gap: 15px; }
-        .portal-form input { flex: 1; padding: 22px 35px; border-radius: 50px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; font-size: 1.2rem; outline: none; transition: all 0.3s; cursor: none; }
-        .portal-form input:focus { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 242, 254, 0.4); }
-
-        /* قسم الإعلانات والتواصل (Business Contact) - VIP LEVEL */
-        .business-section { margin: 0 8% 120px 8%; display: flex; justify-content: center; }
-        .business-card { background: rgba(10, 10, 15, 0.8); border: 2px solid transparent; border-radius: 40px; padding: 60px; text-align: center; width: 100%; max-width: 900px; backdrop-filter: blur(30px); position: relative; background-clip: padding-box; box-shadow: 0 30px 80px rgba(0,0,0,0.8); }
-        /* حدود متوهجة متحركة للقسم */
-        .business-card::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary)); z-index: -1; border-radius: 42px; background-size: 400%; animation: gradientGlow 8s ease infinite; opacity: 0.7; }
-        .business-card h2 { font-size: 2.8rem; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .business-card p { color: var(--muted); font-size: 1.3rem; margin-bottom: 40px; font-weight: 500; }
-        .email-btn { display: inline-flex; align-items: center; justify-content: center; gap: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 20px 50px; border-radius: 50px; color: #fff; font-size: 1.8rem; font-weight: 900; text-decoration: none; transition: all 0.4s; font-family: 'Syne', sans-serif; letter-spacing: 2px; cursor: none; }
-        .email-btn:hover { background: #fff; color: #000; box-shadow: 0 0 40px #fff; transform: scale(1.05); }
-        .email-btn i { font-size: 2rem; color: var(--primary); }
-        .email-btn:hover i { color: #000; }
-
-        /* الإشعار (Toast) */
-        .toast-notify { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%) translateY(200px); background: linear-gradient(45deg, var(--accent), var(--primary)); color: #000; padding: 20px 45px; border-radius: 50px; font-weight: 900; font-size: 1.2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.8); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10000; display: flex; align-items: center; gap: 15px; }
-        .toast-notify.active { transform: translateX(-50%) translateY(0); }
-
-        footer { padding: 40px 8%; text-align: center; border-top: 1px solid var(--border); color: var(--muted); font-size: 1.1rem; background: rgba(3, 3, 5, 0.9); }
-
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes gradientGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        @media (max-width: 992px) {
-            .hero h1 { font-size: 3.5rem; }
-            .cinema-card { grid-template-columns: 1fr; }
-            .portal-form { flex-direction: column; }
-            .portal-form input, .portal-form button { width: 100%; }
-            .email-btn { font-size: 1.2rem; padding: 15px 30px; }
-            body, .btn-epic, .social-item, input, .email-btn { cursor: auto; }
-            .cursor-dot, .cursor-outline { display: none; }
+        .action-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: white;
+            color: #27ae60;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #f1f1f1;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
     </style>
 </head>
 <body>
-
-    <!-- الخلفية السينمائية 3D -->
-    <canvas id="webgl-bg"></canvas>
-
-    <!-- الماوس النيون -->
-    <div class="cursor-dot" id="cursor-dot"></div>
-    <div class="cursor-outline" id="cursor-outline"></div>
-
-    <nav>
-        <a href="#" class="logo">OMAR <span>FAROOQ</span></a>
-        <ul class="nav-links">
-            <li><a href="#hero">الرئيسية</a></li>
-            <li><a href="#featured">آخر فيلم</a></li>
-            <li><a href="#social">المنصات</a></li>
-            <li><a href="#business">للإعلان</a></li>
-        </ul>
-    </nav>
-
-    <section id="hero" class="hero">
-        <div class="hero-tag">
-            <i class="fa-solid fa-fire-flame-curved"></i> تريند #1 في صناعة المحتوى العربي
-        </div>
-        <h1>#عمر_<span>يجرب</span></h1>
-        <p>نكسر حدود المألوف لنعكس الحقيقة من قلب الحدث. انضم إلى ملايين المتابعين في أضخم رحلة استكشاف إنسانية على الإنترنت.</p>
+    <div class="container">
+        <h1>الدرس التفاعلي</h1>
         
-        <a href="#featured" class="btn-epic">
-            <i class="fa-solid fa-play"></i> عِش تجربة تشاد الآن
-        </a>
-    </section>
-
-    <!-- السينما المصغرة -->
-    <section id="featured" class="cinema-section">
-        <div class="section-header">
-            <h2>أحدث الإصدارات السينمائية 🎬</h2>
-            <p>رحلة في أعمق غابات إفريقيا لمعايشة أغرب عادات الزواج في العالم</p>
+        <!-- قسم الفيديو -->
+        <div class="video-container">
+            <!-- يمكنك استبدال هذا بـ iframe الخاص بيوتيوب -->
+            <video controls>
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                متصفحك لا يدعم تشغيل الفيديو.
+            </video>
         </div>
-        <div class="cinema-card">
-            <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/4UZaeH6A12Y?si=HwJJkPeoKrnGEOYL" title="YouTube video player" allowfullscreen></iframe>
+        
+        <!-- قسم النص -->
+        <div class="content">
+            <h3>تفاصيل الدرس</h3>
+            <p>لقد تم ضبط هذا النص بحيث لا يخرج من مكانه أبداً مهما كان حجم الشاشة أو طول الكلمات. تم استخدام خصائص CSS مثل <strong>word-wrap</strong> لضمان عرض المحتوى بشكل أنيق ومضبوط.</p>
+        </div>
+
+        <!-- قسم اللعبة (سؤال الفيديو) -->
+        <div class="quiz-section" id="quiz-container">
+            <h3 class="quiz-title">🎮 تحدي الانتباه!</h3>
+            <p>سؤال من الفيديو: <strong>ما هو الحيوان الذي ظهر في بداية الفيديو؟</strong></p>
+            
+            <div class="options">
+                <button class="option-btn" onclick="checkAnswer(false)">1. أسد كبير</button>
+                <button class="option-btn" onclick="checkAnswer(true)">2. أرنب (Big Buck Bunny)</button>
+                <button class="option-btn" onclick="checkAnswer(false)">3. طائر أزرق</button>
             </div>
-            <div class="cinema-info">
-                <h3>الرجال يرقصون والبنات يختارون أزواجهم! 🇹🇩</h3>
-                <p style="color: var(--muted); font-size: 1.1rem; line-height: 1.7;">رحلة امتدت لساعات في الأدغال، وانعطاف تام عن التكنولوجيا للوصول إلى قبائل الفلاتة والمبررة لمعايشة مهرجان "الجيرول" التنافسي العجيب.</p>
-                <ul class="highlights">
-                    <li><span>01:15</span> الوصول إلى غابات بلا شبكة أو إنترنت</li>
-                    <li><span>06:00</span> الحياة البدائية بدون كهرباء أو ماء</li>
-                    <li><span>11:20</span> كواليس المكياج الطبيعي لرجال القبيلة</li>
-                    <li><span>17:00</span> اللحظة الحاسمة: رقصة المهرجان واختيار الزوج</li>
-                </ul>
-            </div>
         </div>
-    </section>
 
-    <!-- المنصات الاجتماعية -->
-    <section id="social" class="social-universe">
-        <div class="section-header">
-            <h2>شبكة المنصات الرسمية 🌐</h2>
-            <p>كواليس حصرية ويوميات لم تُعرض على اليوتيوب عبر حساباتنا الموثقة</p>
+        <!-- قسم المكافأة (الحدث المهم عند الإجابة الصحيحة) -->
+        <div id="reward-section">
+            <div class="important-reward">🎉 إجابة صحيحة! ممتاز جداً 🎉</div>
+            <p>لأنك ركزت في الفيديو وجاوبت صح، لقد تم فتح المحتوى السري الخاص بك!</p>
+            <p><strong>كود الخصم الخاص بك هو: VIP-100</strong></p>
+            <a href="#" class="action-btn">تحميل شهادة إتمام الدرس 📥</a>
         </div>
-        <div class="social-grid">
-            <a href="https://www.youtube.com/c/omr94" target="_blank" class="social-item yt">
-                <i class="fa-brands fa-youtube"></i> <h4>يوتيوب</h4> <span>القناة الرسمية #عمر_يجرب</span>
-            </a>
-            <a href="https://web.facebook.com/Omrf94" target="_blank" class="social-item fb">
-                <i class="fa-brands fa-facebook-f"></i> <h4>فيسبوك</h4> <span>الصفحة الرسمية Omrf94</span>
-            </a>
-            <a href="https://www.snapchat.com/add/omr94" target="_blank" class="social-item snap">
-                <i class="fa-brands fa-snapchat"></i> <h4>سناب شات</h4> <span>كواليس السفر omr94</span>
-            </a>
-            <a href="https://www.instagram.com/omr94/" target="_blank" class="social-item insta">
-                <i class="fa-brands fa-instagram"></i> <h4>إنستغرام</h4> <span>يوميات omr94</span>
-            </a>
-            <a href="https://www.tiktok.com/@omr94" target="_blank" class="social-item tiktok">
-                <i class="fa-brands fa-tiktok"></i> <h4>تيك توك</h4> <span>المقاطع القصيرة omr94</span>
-            </a>
-        </div>
-    </section>
-
-    <!-- فورم الاقتراحات (مربوط بالايميل) -->
-    <section class="portal-section">
-        <div class="section-header" style="margin-bottom: 20px;">
-            <h2>اقترح تجربة لعمر 💡</h2>
-            <p>الفورم ده مش مجرد شكل! رسالتك هتوصل فوراً لإيميل الفريق الخاص بعمر فاروق.</p>
-        </div>
-        <form class="portal-form" onsubmit="sendIdeaToEmail(event)">
-            <input type="text" id="user-idea" placeholder="اكتب فكرتك أو الدولة اللي نفسك يزورها..." required>
-            <button type="submit" class="btn-epic">إرسال لفريق العمل <i class="fa-solid fa-paper-plane"></i></button>
-        </form>
-    </section>
-
-    <!-- قسم الإعلانات والتواصل (BUSINESS) -->
-    <section id="business" class="business-section">
-        <div class="business-card">
-            <h2>للإعلان والتواصل التجاري 💼</h2>
-            <p>للرعاية، الشراكات التجارية، وبناء حملات إعلانية مبتكرة تصل لملايين المتابعين في الوطن العربي مع عمر فاروق.</p>
-            <a href="mailto:contact@atnafas.me" class="email-btn">
-                <i class="fa-solid fa-envelope"></i> contact@atnafas.me
-            </a>
-        </div>
-    </section>
-
-    <div class="toast-notify" id="toast">
-        <i class="fa-solid fa-circle-check"></i> جاري فتح تطبيق الإيميل لإرسال فكرتك...
     </div>
 
-    <footer>
-        <p>تصميم حصري ومستقبلي | المنصة التفاعلية الرسمية لسلسلة <strong>#عمر_يجرب</strong> &copy; 2026</p>
-    </footer>
-
-    <!-- سكربت الـ 3D والوظائف -->
+    <!-- كود الجافاسكربت الخاص باللعبة -->
     <script>
-        // خلفية 3D خرافية بـ Three.js
-        const canvas = document.getElementById('webgl-bg');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i = 0; i < particlesCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 20;
-
-        const particlesGeometry = new THREE.BufferGeometry();
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ size: 0.03, color: 0x00f2fe, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
-        camera.position.z = 4;
-
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth - 0.5) * 1.5;
-            mouseY = (e.clientY / window.innerHeight - 0.5) * 1.5;
-
-            // تحديث الماوس المخصص
-            document.getElementById('cursor-dot').style.left = e.clientX + 'px';
-            document.getElementById('cursor-dot').style.top = e.clientY + 'px';
-            document.getElementById('cursor-outline').style.left = e.clientX + 'px';
-            document.getElementById('cursor-outline').style.top = e.clientY + 'px';
-        });
-
-        function animate3D() {
-            requestAnimationFrame(animate3D);
-            particlesMesh.rotation.y += 0.0005;
-            particlesMesh.rotation.x += 0.0002;
-            camera.position.x += (mouseX - camera.position.x) * 0.05;
-            camera.position.y += (-mouseY - camera.position.y) * 0.05;
-            renderer.render(scene, camera);
-        }
-        animate3D();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // البرمجة الذكية: ربط الفورم بالإيميل الفعلي للإعلانات والتواصل
-        function sendIdeaToEmail(e) {
-            e.preventDefault();
-            const idea = document.getElementById('user-idea').value;
-            const businessEmail = "contact@atnafas.me";
-            const subject = encodeURIComponent("اقتراح فكرة تجربة جديدة - موقع عمر فاروق");
-            const body = encodeURIComponent("أهلاً فريق عمل عمر فاروق،\n\nلدي فكرة لتجربة جديدة ومثيرة وهي:\n" + idea + "\n\nأتمنى أن تنال إعجابكم!\nتحياتي.");
-
-            const toast = document.getElementById('toast');
-            toast.classList.add('active');
-
-            // بعد ثانية واحدة (عشان اليوزر يشوف الإشعار)، نفتح تطبيق الإيميل الخاص به
-            setTimeout(() => {
-                window.location.href = `mailto:${businessEmail}?subject=${subject}&body=${body}`;
-                toast.classList.remove('active');
-                document.getElementById('user-idea').value = '';
-            }, 1800);
+        function checkAnswer(isCorrect) {
+            if (isCorrect) {
+                // إخفاء السؤال وإظهار المكافأة
+                document.getElementById('quiz-container').style.display = 'none';
+                document.getElementById('reward-section').style.display = 'block';
+            } else {
+                // رسالة عند الإجابة الخاطئة
+                alert("❌ إجابة خاطئة! حاول تركز في الفيديو وتجاوب تاني.");
+            }
         }
     </script>
 </body>
