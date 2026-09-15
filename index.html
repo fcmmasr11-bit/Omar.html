@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عمر فاروق | Omar Farooq</title>
+    <!-- استدعاء خطوط جوجل -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- استدعاء أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* إعدادات عامة */
+        :root {
+            --primary-color: #ff5e00; /* لون برتقالي يعبر عن الطاقة والمغامرة */
+            --bg-color: #0f0f11;
+            --text-color: #ffffff;
+            --card-bg: #1a1a1d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* شريط التنقل (Navbar) */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(15, 15, 17, 0.9);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* الواجهة الرئيسية (Hero Section) */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1951&q=80') center/cover;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 span {
+            color: var(--primary-color);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #cccccc;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 94, 0, 0.4);
+        }
+
+        /* الأقسام العامة */
+        section {
+            padding: 80px 50px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        /* قسم الفيديوهات (Videos) */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .video-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .video-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border: 1px solid var(--primary-color);
+        }
+
+        .video-wrapper iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        /* قسم السوشيال ميديا (Social Links) */
+        .social-section {
+            text-align: center;
+            background-color: var(--card-bg);
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background-color: #2a2a2d;
+            color: white;
+            border-radius: 50%;
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: rotate(360deg);
+        }
+
+        /* تأثيرات الظهور عند النزول (Scroll Animation) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* الفوتر (Footer) */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #000;
+            color: #777;
+        }
+
+        /* التجاوب مع الشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            nav { padding: 20px; flex-direction: column; gap: 15px; }
+            section { padding: 50px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شريط التنقل -->
+    <nav>
+        <a href="#" class="logo">عمر <span>فاروق</span></a>
+        <div class="nav-links">
+            <a href="#home">الرئيسية</a>
+            <a href="#about">من هو عمر؟</a>
+            <a href="#videos">#عمر_يجرب</a>
+            <a href="#social">تواصل معي</a>
+        </div>
+    </nav>
+
+    <!-- الواجهة الرئيسية -->
+    <section id="home" class="hero">
+        <h1>#عمر_<span>يجرب</span></h1>
+        <p>صانع محتوى بحريني.. أعيش التجربة وأنقلها لك كما هي!</p>
+        <a href="#videos" class="btn">شاهد أحدث التجارب</a>
+    </section>
+
+    <!-- قسم عن عمر -->
+    <section id="about" class="reveal">
+        <h2 class="section-title">من هو عمر فاروق؟</h2>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto; line-height: 1.8; font-size: 1.2rem;">
+            <p>صانع أفلام ومحتوى بحريني، اشتهر بسلسلة <strong>#عمر_يجرب</strong> حيث يقوم بوضع نفسه في مواقف ومهن وتجارب حياتية مختلفة ليعيشها وينقل للمشاهدين الصعوبات والمشاعر الحقيقية خلف كل تجربة. هدفي هو استكشاف العالم والإنسان من خلال الكاميرا.</p>
+        </div>
+    </section>
+
+    <!-- قسم الفيديوهات -->
+    <section id="videos" class="reveal">
+        <h2 class="section-title">أحدث تجارب #عمر_يجرب</h2>
+        <div class="video-grid">
+            <!-- فيديو 1 -->
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <!-- استبدل الرابط برابط فيديو عمر فاروق من يوتيوب -->
+                    <iframe src="https://www.youtube.com/embed/g2q-8oO5-vA" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h3>عمر يجرب أن يكون أصم</h3>
+                    <p>تجربة العيش في عالم بلا صوت وتحديات التواصل.</p>
+                </div>
+            </div>
+            
+            <!-- فيديو 2 -->
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/8b_Y5lX1eXQ" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h3>عمر يجرب السجن</h3>
+                    <p>كيف تبدو الحياة خلف القضبان؟ تجربة حقيقية ومثيرة.</p>
+                </div>
+            </div>
+
+            <!-- فيديو 3 -->
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/uA7m_b9Vz5E" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                    <h3>عمر يجرب الدفاع المدني</h3>
+                    <p>يوم في حياة أبطال الإطفاء والإنقاذ.</p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="https://www.youtube.com/c/omr94" target="_blank" class="btn">شاهد كل الحلقات على يوتيوب</a>
+        </div>
+    </section>
+
+    <!-- قسم السوشيال ميديا -->
+    <section id="social" class="social-section reveal">
+        <h2 class="section-title">تابعني على المنصات</h2>
+        <p>لا تفوت كواليس التجارب واليوميات الممتعة!</p>
+        <div class="social-icons">
+            <a href="https://www.youtube.com/c/omr94" target="_blank" title="يوتيوب"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.instagram.com/omr94/" target="_blank" title="إنستجرام"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com/omr94_" target="_blank" title="تويتر (X)"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.tiktok.com/@omr94" target="_blank" title="تيك توك"><i class="fab fa-tiktok"></i></a>
+        </div>
+    </section>
+
+    <!-- الفوتر -->
+    <footer>
+        <p>جميع الحقوق محفوظة &copy; 2026 موقع عمر فاروق غير الرسمي - تم التصميم بشغف 🧡</p>
+    </footer>
+
+    <!-- سكريبت التأثيرات الحركية -->
+    <script>
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        // تشغيل الدالة مرة واحدة عند التحميل لعرض العناصر الظاهرة
+        reveal();
+    </script>
+</body>
+</html>
