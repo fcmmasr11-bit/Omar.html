@@ -3,212 +3,836 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي الفيديو التفاعلي</title>
+    <title>OMAR FAROOQ | #عمر_يجرب - التجربة السينمائية</title>
+    
+    <!-- الخطوط العالمية من Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@300;500;800;900&family=Syne:wght@800&display=swap" rel="stylesheet">
+    <!-- أيقونات FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة Three.js للرسوميات ثلاثية الأبعاد 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        
+        :root {
+            --primary: #ff5e00;
+            --primary-glow: #ff7b2b;
+            --accent: #00f2fe;
+            --bg: #050508;
+            --card-bg: rgba(18, 18, 26, 0.65);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --muted: #9494a8;
+        }
+
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-            /* حل مشكلة خروج النص عن مساره */
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+            scroll-behavior: smooth;
         }
 
         body {
-            background-color: #f4f7f6;
-            color: #333;
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            cursor: none; /* إخفاء الماوس العادي واستبداله بالمؤشر النيون */
+        }
+
+        /* خلفية الـ Canvas 3D */
+        #webgl-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* مؤشر ماوس نيون متطور */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease-out;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        body:hover .cursor-outline {
+            opacity: 1;
+        }
+
+        /* شريط التنقل الهولوغرافي */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 8%;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(5, 5, 8, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Syne', 'Cairo', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* قسم الهيرو الخاراق (Cyber Hero) */
+        .hero {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden; /* يمنع أي عنصر من الخروج عن الحواف */
-        }
-
-        h1 {
-            color: #2c3e50;
             text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            padding: 140px 8% 60px 8%;
+            position: relative;
+        }
+
+        .hero-tag {
+            background: linear-gradient(90deg, rgba(255, 94, 0, 0.2), rgba(0, 242, 254, 0.2));
+            border: 1px solid var(--primary);
+            padding: 10px 24px;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 20px rgba(255, 94, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-tag i { color: var(--primary); animation: pulse 1.2s infinite; }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            background: linear-gradient(180deg, #ffffff 30%, #a5a5b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 750px;
+            font-size: 1.35rem;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 45px;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-epic {
+            padding: 18px 42px;
+            background: linear-gradient(45deg, var(--primary), #ff8c00);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.15rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 0 35px var(--primary-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-epic:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 50px rgba(255, 94, 0, 0.8);
+        }
+
+        .btn-glass {
+            padding: 18px 42px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s;
+        }
+
+        .btn-glass:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* العدادات التفاعلية (Floating Live Counter) */
+        .stats-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 0 8% 120px 8%;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px 20px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transform-style: preserve-3d;
+            transition: transform 0.5s, border-color 0.5s;
+        }
+
+        .stat-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+        }
+
+        .stat-box h3 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .stat-box p {
+            color: var(--muted);
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* سينما العرض الخاص بفيديو تشاد */
+        .cinema-section {
+            margin: 0 8% 140px 8%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 1.2rem;
+        }
+
+        .cinema-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        .cinema-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            opacity: 0.15;
+            pointer-events: none;
         }
 
         .video-container {
             position: relative;
-            padding-bottom: 56.25%; /* نسبة 16:9 */
+            padding-bottom: 56.25%;
             height: 0;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
             background: #000;
         }
 
-        .video-container iframe, .video-container video {
+        .video-container iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: 0;
         }
 
-        .content {
-            background: #fdfbf7;
-            padding: 15px;
-            border-right: 4px solid #f1c40f;
-            border-radius: 5px;
+        .cinema-info {
+            padding: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cinema-tag {
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cinema-info h3 {
+            font-size: 2.1rem;
+            font-weight: 900;
+            line-height: 1.3;
             margin-bottom: 20px;
         }
 
-        .content p {
+        .cinema-info p {
+            color: var(--muted);
             line-height: 1.8;
-            font-size: 16px;
+            font-size: 1.05rem;
+            margin-bottom: 30px;
         }
 
-        /* تنسيقات اللعبة / التحدي */
-        .quiz-section {
-            margin-top: 30px;
-            padding: 25px;
-            background: #eef2f5;
-            border-radius: 12px;
-            border: 2px solid #bdc3c7;
+        .highlights {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .quiz-title {
-            color: #2980b9;
-            margin-top: 0;
+        .highlights h4 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        .highlights ul {
+            list-style: none;
+        }
+
+        .highlights li {
+            font-size: 0.95rem;
+            color: #ccc;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .options {
+        .highlights li span {
+            background: var(--primary);
+            color: #000;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        /* شبكة التواصل الاجتماعي الهولوغرافية (3D Tilt Social Cards) */
+        .social-universe {
+            margin: 0 8% 140px 8%;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .social-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 35px 25px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .option-btn {
-            padding: 12px 20px;
-            background: #fff;
-            border: 2px solid #3498db;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: right;
-            font-size: 16px;
-            font-weight: bold;
-            color: #3498db;
+        .social-item i {
+            font-size: 3rem;
+            transition: transform 0.4s ease;
         }
 
-        .option-btn:hover {
-            background: #3498db;
-            color: white;
-            transform: translateX(-5px);
+        /* ألوان الأيقونات والتأثيرات */
+        .social-item.yt i { color: #ff0000; }
+        .social-item.fb i { color: #1877f2; }
+        .social-item.snap i { color: #fffc00; }
+        .social-item.insta i { color: #e1306c; }
+        .social-item.tiktok i { color: #00f2fe; }
+        .social-item.twitter i { color: #fff; }
+
+        .social-item h4 {
+            font-size: 1.3rem;
+            font-weight: 800;
         }
 
-        #reward-section {
-            display: none;
-            margin-top: 20px;
-            padding: 30px;
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            border-radius: 12px;
+        .social-item span {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .social-item:hover {
+            transform: translateY(-12px) scale(1.04);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px var(--primary-glow);
+        }
+
+        .social-item:hover i {
+            transform: scale(1.25) rotate(10deg);
+        }
+
+        /* قسم التفاعل وإرسال الأفكار (Cyber Form Portal) */
+        .portal-section {
+            margin: 0 8% 120px 8%;
+            background: linear-gradient(135deg, rgba(255, 94, 0, 0.15), rgba(0, 242, 254, 0.05));
+            border: 1px solid var(--primary);
+            border-radius: 36px;
+            padding: 70px 8%;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
 
-        @keyframes popIn {
-            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
+        .portal-form {
+            display: flex;
+            max-width: 650px;
+            margin: 35px auto 0 auto;
+            gap: 12px;
         }
 
-        .important-reward {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 15px;
+        .portal-form input {
+            flex: 1;
+            padding: 20px 30px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            background: rgba(5, 5, 8, 0.8);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s;
         }
-        
-        .action-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 25px;
-            background: white;
-            color: #27ae60;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 25px;
-            transition: 0.3s;
+
+        .portal-form input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
         }
-        
-        .action-btn:hover {
-            background: #f1f1f1;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+
+        /* الإشعار التفاعلي (Toast Alert) */
+        .toast-notify {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10000;
+        }
+
+        .toast-notify.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* الفوتر */
+        footer {
+            padding: 40px 8%;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 1rem;
+            background: rgba(5, 5, 8, 0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* التجاوب مع الهواتف المحمولة */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 3.2rem; }
+            .cinema-card { grid-template-columns: 1fr; }
+            .portal-form { flex-direction: column; }
+            .portal-form input, .portal-form button { width: 100%; }
+            body { cursor: auto; }
+            .cursor-dot, .cursor-outline { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>الدرس التفاعلي</h1>
-        
-        <!-- قسم الفيديو -->
-        <div class="video-container">
-            <!-- يمكنك استبدال هذا بـ iframe الخاص بيوتيوب -->
-            <video controls>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-                متصفحك لا يدعم تشغيل الفيديو.
-            </video>
-        </div>
-        
-        <!-- قسم النص -->
-        <div class="content">
-            <h3>تفاصيل الدرس</h3>
-            <p>لقد تم ضبط هذا النص بحيث لا يخرج من مكانه أبداً مهما كان حجم الشاشة أو طول الكلمات. تم استخدام خصائص CSS مثل <strong>word-wrap</strong> لضمان عرض المحتوى بشكل أنيق ومضبوط.</p>
-        </div>
 
-        <!-- قسم اللعبة (سؤال الفيديو) -->
-        <div class="quiz-section" id="quiz-container">
-            <h3 class="quiz-title">🎮 تحدي الانتباه!</h3>
-            <p>سؤال من الفيديو: <strong>ما هو الحيوان الذي ظهر في بداية الفيديو؟</strong></p>
-            
-            <div class="options">
-                <button class="option-btn" onclick="checkAnswer(false)">1. أسد كبير</button>
-                <button class="option-btn" onclick="checkAnswer(true)">2. أرنب (Big Buck Bunny)</button>
-                <button class="option-btn" onclick="checkAnswer(false)">3. طائر أزرق</button>
-            </div>
-        </div>
+    <!-- خلفية الـ 3D التفاعلية بواسطة Three.js -->
+    <canvas id="webgl-bg"></canvas>
 
-        <!-- قسم المكافأة (الحدث المهم عند الإجابة الصحيحة) -->
-        <div id="reward-section">
-            <div class="important-reward">🎉 إجابة صحيحة! ممتاز جداً 🎉</div>
-            <p>لأنك ركزت في الفيديو وجاوبت صح، لقد تم فتح المحتوى السري الخاص بك!</p>
-            <p><strong>كود الخصم الخاص بك هو: VIP-100</strong></p>
-            <a href="#" class="action-btn">تحميل شهادة إتمام الدرس 📥</a>
+    <!-- الماوس النيون التفاعلي -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- النافبار الهولوغرافي -->
+    <nav>
+        <a href="#" class="logo">OMAR <span>FAROOQ</span></a>
+        <ul class="nav-links">
+            <li><a href="#hero">الرئيسية</a></li>
+            <li><a href="#featured">آخر إنتجاتنا</a></li>
+            <li><a href="#social">شبكة الروابط</a></li>
+            <li><a href="#suggest">اقترح تجربة</a></li>
+        </ul>
+    </nav>
+
+    <!-- قسم الهيرو الرئيسي -->
+    <section id="hero" class="hero">
+        <div class="hero-tag">
+            <i class="fa-solid fa-bolt"></i> التجربة الأفريقية الجديدة الآن على يوتيوب
+        </div>
+        <h1>#عمر_<span>يجرب</span></h1>
+        <p>مرحباً بك في عالم المغامرات والاستكشاف الإنساني بدون حدود. نعيش التحديات الصعبة ونعكس الحقيقة كاملة من قلب الحدث!</p>
+        
+        <div class="hero-cta">
+            <a href="#featured" class="btn-epic">
+                <i class="fa-solid fa-play"></i> شاهد تجربة تشاد
+            </a>
+            <a href="#social" class="btn-glass">
+                <i class="fa-solid fa-share-nodes"></i> جميع المنصات الرسمية
+            </a>
+        </div>
+    </section>
+
+    <!-- قسم الإحصائيات الفضائية المباشرة -->
+    <div class="stats-wrapper">
+        <div class="stat-box">
+            <h3 class="counter" data-target="650">0</h3>
+            <p>مليون+ مشاهدة شاملة 👁️</p>
+        </div>
+        <div class="stat-box">
+            <h3 class="counter" data-target="5.5">0</h3>
+            <p>مليون+ مشترك يوتيوب 🔴</p>
+        </div>
+        <div class="stat-box">
+            <h3 class="counter" data-target="130">0</h3>
+            <p>حلقة وتحدي مكتمل 🎬</p>
+        </div>
+        <div class="stat-box">
+            <h3 class="counter" data-target="48">0</h3>
+            <p>دولة تم استكشافها 🌍</p>
         </div>
     </div>
 
-    <!-- كود الجافاسكربت الخاص باللعبة -->
+    <!-- سينما العرض الخاص بفيديو تشاد المباشر -->
+    <section id="featured" class="cinema-section">
+        <div class="section-header">
+            <h2>التجربة السينمائية الرئيسية 🎥</h2>
+            <p>رحلة في أعمق غابات تشاد لمعايشة أغرب مهرجان زواج وتقاليد في العالم</p>
+        </div>
+
+        <div class="cinema-card">
+            <div class="video-container">
+                <!-- تضمين فيديو عمر فاروق الرسمي المباشر من يوتيوب -->
+                <iframe src="https://www.youtube.com/embed/4UZaeH6A12Y?autoplay=0" title="الرجال يرقصون والبنات يختارون أزواجهم 🇹🇩 #عمر_يجرب" allowfullscreen></iframe>
+            </div>
+            <div class="cinema-info">
+                <div class="cinema-tag">
+                    <i class="fa-solid fa-location-dot"></i> جمهورية تشاد 🇹🇩 | غابات السافانا
+                </div>
+                <h3>الرجال يرقصون والبنات يختارون أزواجهم!</h3>
+                <p>سفرية امتدت لساعات في الادغال والانعطاف التام عن التكنولوجيا للوصول إلى قبائل "الفلاتة والمبررة" لمعايشة طقوس ومهرجان الجيرول السنوي.</p>
+                
+                <div class="highlights">
+                    <h4><i class="fa-solid fa-star"></i> محطات الحلقات:</h4>
+                    <ul>
+                        <li><span>01:15</span> رحلة ست ساعات بالسيارة وسط غابات بلا شبكة.</li>
+                        <li><span>06:00</span> التعرف على حياة القبيلة بدون كهرباء وماء.</li>
+                        <li><span>11:20</span> كواليس الميكياج الطبيعي 100% لرجال القبيلة.</li>
+                        <li><span>17:00</span> خوض عمر فاروق للرقصة والمهرجان التنافسي!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- شبكة التواصل الاجتماعي الهولوغرافية (جميع الروابط المطلوبة) -->
+    <section id="social" class="social-universe">
+        <div class="section-header">
+            <h2>شبكة المنصات الرسمية 🌐</h2>
+            <p>تواصل وتابع جميع الكواليس الحصرية عبر الحسابات الموثقة فقط</p>
+        </div>
+
+        <div class="social-grid">
+            <!-- يوتيوب -->
+            <a href="https://www.youtube.com/c/omr94" target="_blank" class="social-item yt">
+                <i class="fa-brands fa-youtube"></i>
+                <h4>يوتيوب</h4>
+                <span>القناة الرسمية #عمر_يجرب</span>
+            </a>
+
+            <!-- فيسبوك (المطلوب) -->
+            <a href="https://web.facebook.com/Omrf94" target="_blank" class="social-item fb">
+                <i class="fa-brands fa-facebook-f"></i>
+                <h4>فيسبوك</h4>
+                <span>الصفحة الرسمية Omrf94</span>
+            </a>
+
+            <!-- سناب شات (المطلوب) -->
+            <a href="https://www.snapchat.com/add/omr94" target="_blank" class="social-item snap">
+                <i class="fa-brands fa-snapchat"></i>
+                <h4>سناب شات</h4>
+                <span>اليوميات المباشرة omr94</span>
+            </a>
+
+            <!-- إنستغرام -->
+            <a href="https://www.instagram.com/omr94/" target="_blank" class="social-item insta">
+                <i class="fa-brands fa-instagram"></i>
+                <h4>إنستغرام</h4>
+                <span>الصور والستوريات omr94</span>
+            </a>
+
+            <!-- تيك توك -->
+            <a href="https://www.tiktok.com/@omr94" target="_blank" class="social-item tiktok">
+                <i class="fa-brands fa-tiktok"></i>
+                <h4>تيك توك</h4>
+                <span>المقاطع القصيرة omr94</span>
+            </a>
+
+            <!-- تويتر -->
+            <a href="https://twitter.com/omr94_" target="_blank" class="social-item twitter">
+                <i class="fa-brands fa-x-twitter"></i>
+                <h4>تويتر (X)</h4>
+                <span>الحساب الرسمي @omr94_</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- بوابة التفاعل وإرسال المقترحات -->
+    <section id="suggest" class="portal-section">
+        <div class="section-header" style="margin-bottom: 20px;">
+            <h2>بوابة مقترحات الجمهور 💡</h2>
+            <p>ما هو التحدي أو الدولة التي تريد من <strong>عمر فاروق</strong> أن يجربها في الفيديو القادم؟</p>
+        </div>
+        <form class="portal-form" onsubmit="submitIdea(event)">
+            <input type="text" id="user-idea" placeholder="اكتب فكرة التجربة أو المكان هنا..." required>
+            <button type="submit" class="btn-epic">إرسال الفكرة 🚀</button>
+        </form>
+    </section>
+
+    <!-- الفوتر -->
+    <footer>
+        <p>جميع الحقوق محفوظة &copy; 2026 - المنصة السينمائية التفاعلية لسلسلة <strong>#عمر_يجرب</strong> 🔥</p>
+    </footer>
+
+    <!-- الإشعار التفاعلي -->
+    <div class="toast-notify" id="toast">🔥 تمت إضافة فكرتك بنجاح! قد نراها قريباً في #عمر_يجرب</div>
+
+    <!-- السكريبت التفاعلي مع Three.js وWebGL -->
     <script>
-        function checkAnswer(isCorrect) {
-            if (isCorrect) {
-                // إخفاء السؤال وإظهار المكافأة
-                document.getElementById('quiz-container').style.display = 'none';
-                document.getElementById('reward-section').style.display = 'block';
-            } else {
-                // رسالة عند الإجابة الخاطئة
-                alert("❌ إجابة خاطئة! حاول تركز في الفيديو وتجاوب تاني.");
+        // 1. إعداد خلفية ثلاثية الأبعاد 3D باستخدام Three.js
+        const canvas = document.getElementById('webgl-bg');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // إنشاء جسيمات ضوئية متحركة (Particle Galaxy)
+        const particlesCount = 1200;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: 0xff5e00,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 3;
+
+        // تفاعل الخلفية الـ 3D مع حركة الماوس
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
+
+            // تحديث موقع الماوس النيون Custom Cursor
+            const dot = document.getElementById('cursor-dot');
+            const outline = document.getElementById('cursor-outline');
+            
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+            
+            outline.style.left = e.clientX + 'px';
+            outline.style.top = e.clientY + 'px';
+        });
+
+        // حلقة التحريك (Animation Loop)
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.0005;
+
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY - camera.position.y) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // إعادة ضبط الحجم عند تغيير حجم الشاشة
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 2. عداد الأرقام التفاعلي المباشر
+        let animated = false;
+        window.addEventListener('scroll', () => {
+            const statsSection = document.querySelector('.stats-wrapper');
+            const pos = statsSection.getBoundingClientRect().top;
+            if (pos < window.innerHeight && !animated) {
+                animated = true;
+                document.querySelectorAll('.counter').forEach(counter => {
+                    const target = parseFloat(counter.getAttribute('data-target'));
+                    let count = 0;
+                    const step = target / 40;
+                    const update = () => {
+                        count += step;
+                        if (count < target) {
+                            counter.innerText = count.toFixed(1);
+                            setTimeout(update, 35);
+                        } else {
+                            counter.innerText = target;
+                        }
+                    };
+                    update();
+                });
             }
+        });
+
+        // 3. إرسال الاقتراح والتنبيه الهولوغرافي
+        function submitIdea(e) {
+            e.preventDefault();
+            const toast = document.getElementById('toast');
+            toast.classList.add('active');
+            document.getElementById('user-idea').value = '';
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 4000);
         }
     </script>
 </body>
-</html>
+    </html>
